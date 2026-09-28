@@ -1,0 +1,23 @@
+.env
+*.log
+logs/
+history/
+chat_history/
+memory/
+*.db
+__pycache__/
+.DS_Store
+node_modules/
+credentials.json
+token.json
+service_account.json
+
+# Python envs
+.venv/
+venv/
+
+# Local runtime artifacts
+DATA/whatsapp_session/
+DATA/*.db-shm
+DATA/*.db-wal
+chat_history.txt

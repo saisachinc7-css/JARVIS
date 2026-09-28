@@ -1,0 +1,30 @@
+1. Rice  
+2. Wheat flour  
+3. Sugar  
+4. Salt  
+5. Cooking oil  
+6. Milk  
+7. Eggs  
+8. Bread  
+9. Butter  
+10. Cheese  
+11. Tomatoes  
+12. Onions  
+13. Potatoes  
+14. Garlic  
+15. Ginger  
+16. Apples  
+17. Bananas  
+18. Oranges  
+19. Chicken  
+20. Fish  
+21. Yogurt  
+22. Cereal  
+23. Lentils  
+24. Chickpeas  
+25. Tea leaves  
+26. Coffee  
+27. Biscuits  
+28. Cooking spices  
+29. Soap  
+30. Dishwashing liquid  

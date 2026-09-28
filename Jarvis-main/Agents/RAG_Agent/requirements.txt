@@ -1,0 +1,11 @@
+ollama
+faiss-cpu
+pdfplumber 
+langchain
+langchain-core
+langchain-ollama
+langchain-community
+langchain_text_splitters
+unstructured
+pikepdf
+elevenlabs

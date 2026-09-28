@@ -1,0 +1,13 @@
+﻿{
+  "contacts": [
+    {
+      "name": "YOUR_CONTACT_NAME",
+      "aliases": [
+        "your_contact",
+        "friend"
+      ],
+      "phone": "YOUR_PHONE_NUMBER",
+      "notes": "Sample contact"
+    }
+  ]
+}

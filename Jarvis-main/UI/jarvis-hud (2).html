@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>J.A.R.V.I.S. // INTERFACE</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+:root{
+  --cyan:        #4fd8ff;
+  --cyan-bright: #b8f4ff;
+  --cyan-dim:    #1c5f75;
+  --blue-deep:   #04121c;
+  --bg-0:        #010305;
+  --bg-1:        #020a12;
+  --glow:        0 0 6px rgba(79,216,255,.65);
+  --glow-strong: 0 0 14px rgba(79,216,255,.9), 0 0 30px rgba(79,216,255,.35);
+}
+
+*{box-sizing:border-box; margin:0; padding:0;}
+
+html,body{
+  width:100%; height:100%;
+  background: radial-gradient(ellipse at 50% 45%, #051822 0%, #010609 55%, #000000 100%);
+  font-family:'Rajdhani', sans-serif;
+  color: var(--cyan);
+  overflow:hidden;
+  letter-spacing:.04em;
+}
+
+.screen{
+  position:relative;
+  width:100%; height:100vh;
+  padding:14px 18px;
+  display:grid;
+  grid-template-columns: 300px 1fr 300px;
+  grid-template-rows: 96px 1fr 120px;
+  gap:10px;
+}
+
+/* faint scanline / grid texture */
+.screen::before{
+  content:"";
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(rgba(79,216,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79,216,255,.035) 1px, transparent 1px);
+  background-size: 34px 34px;
+  pointer-events:none;
+  mask-image: radial-gradient(ellipse at 50% 45%, black 0%, transparent 72%);
+}
+
+/* ---------- generic panel ---------- */
+.panel{
+  position:relative;
+  border:1px solid rgba(79,216,255,.35);
+  background:linear-gradient(180deg, rgba(10,40,55,.28), rgba(2,10,16,.5));
+  padding:8px 10px;
+  font-size:11px;
+  box-shadow: inset 0 0 18px rgba(79,216,255,.05);
+}
+.panel::after{
+  content:"";
+  position:absolute; top:0; left:0; width:14px; height:14px;
+  border-top:2px solid var(--cyan-bright);
+  border-left:2px solid var(--cyan-bright);
+  opacity:.8;
+}
+.panel-label{
+  font-family:'Orbitron', sans-serif;
+  font-size:9px;
+  letter-spacing:.18em;
+  color:var(--cyan-dim);
+  text-transform:uppercase;
+  margin-bottom:4px;
+}
+.value-lg{
+  font-family:'Orbitron', sans-serif;
+  color:var(--cyan-bright);
+  text-shadow:var(--glow);
+}
+
+/* ---------- header ---------- */
+.header{
+  grid-column:1 / 4;
+  display:grid;
+  grid-template-columns: 1fr 260px 1fr;
+  align-items:center;
+  gap:12px;
+}
+.hdr-strip{
+  height:100%;
+  border:1px solid rgba(79,216,255,.3);
+  background:linear-gradient(180deg, rgba(10,40,55,.25), rgba(2,10,16,.45));
+  display:flex; align-items:center; gap:18px; padding:0 16px;
+  font-size:10px; color:var(--cyan-dim);
+  font-family:'Orbitron',sans-serif; letter-spacing:.12em; text-transform:uppercase;
+}
+.hdr-strip span b{color:var(--cyan-bright); font-weight:600;}
+
+.avatar-block{
+  position:relative;
+  height:100%;
+  border:1px solid rgba(79,216,255,.4);
+  background:linear-gradient(180deg, rgba(10,40,55,.3), rgba(2,10,16,.55));
+  display:flex; align-items:center; gap:12px; padding:0 14px;
+}
+.avatar-ring{
+  width:58px; height:58px; border-radius:50%;
+  border:2px solid var(--cyan);
+  box-shadow: var(--glow-strong);
+  display:flex; align-items:center; justify-content:center;
+  position:relative;
+  background: radial-gradient(circle at 40% 35%, #143a4a, #01080c 70%);
+  overflow:hidden;
+  flex:none;
+}
+.avatar-ring::before{
+  content:"";
+  position:absolute; inset:-6px;
+  border-radius:50%;
+  border:1px dashed rgba(79,216,255,.5);
+  animation: spin 14s linear infinite;
+}
+.avatar-ring svg{width:30px;height:30px;stroke:var(--cyan-bright);}
+.avatar-text{font-family:'Orbitron',sans-serif;}
+.avatar-text .name{font-size:16px; font-weight:700; color:var(--cyan-bright); text-shadow:var(--glow); letter-spacing:.15em;}
+.avatar-text .ver{font-size:9px; color:var(--cyan-dim); margin-top:2px;}
+.avatar-text .user{font-size:9px; color:var(--cyan); margin-top:6px; letter-spacing:.08em;}
+
+/* ---------- waveform mini bars ---------- */
+.bars{ display:flex; align-items:flex-end; gap:2px; height:26px; }
+.bars i{
+  display:block; width:3px; background:var(--cyan);
+  box-shadow:var(--glow); opacity:.75;
+  animation: bar 1.4s ease-in-out infinite;
+}
+@keyframes bar{ 0%,100%{transform:scaleY(.25);} 50%{transform:scaleY(1);} }
+
+/* ---------- side columns ---------- */
+.col{ display:flex; flex-direction:column; gap:10px; min-height:0; }
+.col-left{grid-column:1; grid-row:2;}
+.col-right{grid-column:3; grid-row:2;}
+.col .panel.grow{flex:1; min-height:0; display:flex; flex-direction:column;}
+
+.stat-row{display:flex; justify-content:space-between; font-size:10px; margin-top:2px;}
+.stat-row b{color:var(--cyan-bright);}
+
+canvas.graph{width:100%; flex:1; min-height:40px; display:block;}
+
+.meter-track{
+  height:6px; width:100%; background:rgba(79,216,255,.08);
+  border:1px solid rgba(79,216,255,.25); margin-top:6px; position:relative;
+}
+.meter-fill{ position:absolute; inset:0; width:40%; background:linear-gradient(90deg, var(--cyan-dim), var(--cyan)); box-shadow:var(--glow); }
+
+.dial-pair{display:flex; gap:8px; align-items:center; justify-content:space-between;}
+.dial{
+  width:46px; height:46px; border-radius:50%;
+  border:2px solid var(--cyan); box-shadow:var(--glow);
+  position:relative; flex:none;
+  background:radial-gradient(circle, rgba(79,216,255,.08), transparent 70%);
+}
+.dial::before{
+  content:""; position:absolute; top:2px; left:50%;
+  width:2px; height:10px; background:var(--cyan-bright);
+  transform-origin:1px 21px; transform:translateX(-1px) rotate(0deg);
+  animation: tick 5s ease-in-out infinite alternate;
+}
+@keyframes tick{ 0%{transform:translateX(-1px) rotate(-40deg);} 100%{transform:translateX(-1px) rotate(220deg);} }
+
+/* ---------- center reactor ---------- */
+.center{
+  grid-column:2; grid-row:2;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+}
+.reactor-wrap{ position:relative; width:min(96%,440px); aspect-ratio:1/1; }
+
+.chat-container {
+  width: 96%;
+  max-width: 560px;
+  height: 160px;
+  background: rgba(1, 10, 18, 0.88);
+  border: 1px solid rgba(79, 216, 255, 0.45);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: inset 0 0 20px rgba(79, 216, 255, 0.08), 0 4px 25px rgba(0, 0, 0, 0.65), 0 0 15px rgba(79, 216, 255, 0.25);
+  backdrop-filter: blur(8px);
+  z-index: 10;
+  cursor: text;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.chat-container:focus-within, .chat-container.active {
+  border-color: rgba(79, 216, 255, 0.85);
+  box-shadow: inset 0 0 25px rgba(79, 216, 255, 0.15), 0 0 20px rgba(79, 216, 255, 0.4);
+}
+.chat-header {
+  padding: 6px 12px;
+  background: linear-gradient(90deg, rgba(79, 216, 255, 0.15), rgba(4, 18, 28, 0.6));
+  border-bottom: 1px solid rgba(79, 216, 255, 0.25);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+}
+.chat-title {
+  color: var(--cyan-bright);
+  text-shadow: var(--glow);
+}
+.chat-status {
+  color: #22c55e;
+  text-shadow: 0 0 4px rgba(34, 197, 94, 0.5);
+}
+.chat-messages {
+  flex: 1;
+  padding: 10px 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  font-family: 'Fira Code', 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
+  font-size: 11px;
+  color: var(--cyan-bright);
+  line-height: 1.45;
+  outline: none;
+}
+.chat-messages::-webkit-scrollbar {
+  width: 5px;
+}
+.chat-messages::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+}
+.chat-messages::-webkit-scrollbar-thumb {
+  background: rgba(79, 216, 255, 0.35);
+  border-radius: 3px;
+}
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: rgba(79, 216, 255, 0.6);
+}
+
+/* Console Entries */
+.console-divider {
+  color: rgba(79, 216, 255, 0.25);
+  font-size: 9px;
+  margin: 4px 0;
+  user-select: none;
+}
+.console-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  animation: fadeIn 0.2s ease-out;
+}
+.console-role {
+  font-weight: 700;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+.console-entry.user .console-role { color: #00d4ff; text-shadow: 0 0 5px rgba(0,212,255,0.5); }
+.console-entry.user_voice .console-role { color: #38bdf8; text-shadow: 0 0 5px rgba(56,189,248,0.5); }
+.console-entry.jarvis .console-role { color: #a855f7; text-shadow: 0 0 5px rgba(168,85,247,0.5); }
+.console-entry.tool .console-role { color: #eab308; }
+.console-entry.system .console-role { color: #94a3b8; }
+
+.console-body {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.console-entry.user .console-body { color: #e0f2fe; }
+.console-entry.user_voice .console-body { color: #bae6fd; }
+.console-entry.jarvis .console-body { color: #f3e8ff; }
+.console-entry.tool .console-body { color: #fef08a; font-size: 10px; }
+.console-entry.system .console-body { color: #cbd5e1; font-style: italic; font-size: 10px; }
+
+.console-success {
+  color: #22c55e;
+  font-weight: 600;
+  margin-top: 2px;
+  text-shadow: 0 0 6px rgba(34, 197, 94, 0.4);
+}
+
+/* Active Command Prompt Line */
+.active-prompt-line {
+  display: flex;
+  align-items: center;
+  margin-top: 6px;
+  font-family: 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+  font-size: 11px;
+  min-height: 20px;
+}
+.active-prompt-label {
+  color: #00f0ff;
+  font-weight: bold;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  margin-right: 6px;
+  user-select: none;
+  text-shadow: 0 0 6px rgba(0, 240, 255, 0.6);
+}
+.terminal-input {
+  color: #ffffff;
+  outline: none;
+  border: none;
+  background: transparent;
+  flex: 1;
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-width: 5px;
+}
+.terminal-cursor {
+  display: inline-block;
+  color: #00f0ff;
+  font-weight: bold;
+  margin-left: 2px;
+  animation: cursorBlink 1s infinite;
+  text-shadow: 0 0 8px #00f0ff;
+  user-select: none;
+}
+@keyframes cursorBlink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+.ring{ position:absolute; inset:0; border-radius:50%; }
+.ring-outer{
+  border:1px solid rgba(79,216,255,.35);
+  background: repeating-conic-gradient(rgba(79,216,255,.5) 0deg 1.2deg, transparent 1.2deg 6deg);
+  -webkit-mask: radial-gradient(circle, transparent 65%, black 66%, black 70%, transparent 71%);
+          mask: radial-gradient(circle, transparent 65%, black 66%, black 70%, transparent 71%);
+  animation: spin 60s linear infinite;
+}
+.ring-mid{
+  inset:9%;
+  border:1px solid rgba(79,216,255,.5);
+  -webkit-mask: radial-gradient(circle, transparent 78%, black 79%, black 84%, transparent 85%);
+          mask: radial-gradient(circle, transparent 78%, black 79%, black 84%, transparent 85%);
+  background: repeating-conic-gradient(rgba(79,216,255,.7) 0deg 2deg, transparent 2deg 9deg);
+  animation: spin 40s linear infinite reverse;
+}
+.ring-inner-line{
+  inset:19%;
+  border:1px solid rgba(79,216,255,.55);
+  box-shadow:0 0 14px rgba(79,216,255,.25) inset;
+}
+
+@keyframes spin{ to{ transform:rotate(360deg);} }
+
+.labels{ position:absolute; inset:0; }
+.lbl{
+  position:absolute; top:50%; left:50%;
+  transform-origin: 0 0;
+  font-family:'Orbitron',sans-serif;
+  font-size:9px; letter-spacing:.12em;
+  color:var(--cyan-bright); text-shadow:var(--glow);
+  white-space:nowrap;
+}
+.lbl span{ display:inline-block; transform: translate(-50%,-50%); }
+
+/* core */
+.core{
+  position:absolute; inset:12%;
+  display:flex; align-items:center; justify-content:center;
+}
+.core svg{ width:100%; height:100%; overflow:visible; }
+.tri{
+  fill:none; stroke:var(--cyan); stroke-width:2.4;
+  filter: drop-shadow(0 0 6px rgba(79,216,255,.9));
+  animation: pulse 2.6s ease-in-out infinite;
+}
+.tri-fill{
+  fill: rgba(79,216,255,.12);
+  animation: pulseFill 2.6s ease-in-out infinite;
+}
+@keyframes pulse{ 0%,100%{ stroke-opacity:.65; } 50%{ stroke-opacity:1; } }
+@keyframes pulseFill{ 0%,100%{ fill-opacity:.6; } 50%{ fill-opacity:1; } }
+
+.core-center-text{
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  text-align:center; font-family:'Orbitron',sans-serif;
+}
+.core-center-text .pct{ font-size:22px; color:var(--cyan-bright); text-shadow:var(--glow-strong); font-weight:700; }
+.core-center-text .sub{ font-size:8px; color:var(--cyan-dim); letter-spacing:.2em; margin-top:2px;}
+
+.tick-num{
+  position:absolute; font-family:'Orbitron',sans-serif; font-size:10px;
+  color:var(--cyan); text-shadow:var(--glow);
+}
+
+/* ---------- footer ---------- */
+.footer{
+  grid-column:1 / 4; grid-row:3;
+  display:grid; grid-template-columns: 300px 1fr 300px; gap:10px;
+}
+.brand{
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Orbitron',sans-serif; font-size:22px; font-weight:900;
+  letter-spacing:.3em; color:var(--cyan-bright);
+  text-shadow:var(--glow-strong);
+  border:1px solid rgba(79,216,255,.3);
+  background:linear-gradient(180deg, rgba(10,40,55,.2), rgba(2,10,16,.4));
+  clip-path: polygon(0 0, 96% 0, 100% 100%, 4% 100%);
+}
+
+/* clock in right column header area */
+.clock-box{ text-align:right; }
+.clock-time{ font-family:'Orbitron',sans-serif; font-size:26px; color:var(--cyan-bright); text-shadow:var(--glow-strong); }
+.clock-date{ font-size:10px; color:var(--cyan-dim); margin-top:2px; }
+
+.weather-temp{ font-family:'Orbitron',sans-serif; font-size:34px; color:var(--cyan-bright); text-shadow:var(--glow-strong); line-height:1;}
+.weather-cond{ font-size:12px; margin:2px 0 6px; }
+.weather-grid{ display:grid; grid-template-columns:1fr 1fr; gap:2px 10px; font-size:9.5px; }
+.weather-grid div b{color:var(--cyan-bright); font-weight:600;}
+.forecast-day{ margin-top:6px; font-size:10px; }
+.forecast-day .d{color:var(--cyan-bright); font-family:'Orbitron',sans-serif; font-size:9px; letter-spacing:.1em;}
+
+::selection{ background:rgba(79,216,255,.3); }
+</style>
+</head>
+<body>
+
+<div class="screen">
+
+  <!-- ===== HEADER ===== -->
+  <div class="header">
+    <div class="hdr-strip">
+      <span>SAMPLERATE <b>0 KHZ</b></span>
+      <span>BITRATE <b>0 KBPS</b></span>
+      <span>CHANNELS <b>0</b></span>
+      <div class="bars" id="bars"></div>
+    </div>
+
+    <div class="avatar-block">
+      <div class="avatar-ring">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4"/></svg>
+      </div>
+      <div class="avatar-text">
+        <div class="name">JARVIS OS</div>
+        <div class="ver">VER 1.2.5</div>
+        <div class="user">USER: <span id="userName">OPERATOR</span></div>
+      </div>
+    </div>
+
+    <div class="panel" style="grid-column: 3; height:100%; display:flex; flex-direction:column; overflow:hidden; padding:4px 8px; justify-content: flex-start; text-align:left;">
+      <div class="panel-label" style="font-size:8px; margin-bottom:2px;">REMINDERS / TO DO LIST</div>
+      <div id="remindersContainer" style="flex:1; overflow-y:auto; font-size:10px; display:flex; flex-direction:column; gap:2px; padding-right:2px;">
+        <div style="color:var(--cyan-dim); font-style:italic;">No active reminders.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== LEFT COLUMN ===== -->
+  <div class="col col-left">
+    <div class="panel">
+      <div class="panel-label">Audio Monitor</div>
+      <canvas class="graph" id="waveGraph" height="46"></canvas>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">CPU Usage</div>
+      <canvas class="graph" id="cpuGraph" height="60"></canvas>
+      <div class="stat-row"><span>USAGE</span><b id="cpuVal">00.0 %</b></div>
+      <div class="stat-row"><span>TEMP</span><b id="cpuTemp">0.0°C</b></div>
+    </div>
+
+    <div class="panel grow" style="display:flex; flex-direction:column; align-items:center; justify-content:center; overflow:hidden; position:relative; padding:0;">
+      <div class="panel-label" style="position:absolute; top:8px; left:10px; margin:0; z-index:5;">GLOBAL OPERATIONS MAP</div>
+      <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:rgba(4,18,28,0.25);">
+        <img src="/world_map.png" style="width:100%; height:94%; object-fit:contain; opacity:0.85; filter: drop-shadow(0 0 8px rgba(79,216,255,0.45));" />
+      </div>
+    </div>
+
+    <div class="panel grow" style="display:flex; flex-direction:column; overflow:hidden;">
+      <div class="panel-label">WHAT'S HAPPENING AROUND THE WORLD</div>
+      <div id="newsContainer" style="flex:1; overflow-y:auto; font-size:10px; display:flex; flex-direction:column; gap:6px; padding-right:2px; line-height:1.3; text-align:left;">
+        <div style="color:var(--cyan-dim); font-style:italic;">Loading news feed...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CENTER REACTOR ===== -->
+  <div class="center">
+    <div class="reactor-wrap" id="reactorWrap">
+      <div class="ring ring-outer"></div>
+      <div class="ring ring-mid"></div>
+      <div class="ring ring-inner-line"></div>
+
+      <div class="labels" id="labelLayer"></div>
+
+      <div class="core-center-text">
+        <div class="pct" id="reactorState">IDLE</div>
+        <div class="sub">JARVIS CORE</div>
+      </div>
+
+      <div class="core">
+        <svg viewBox="0 0 200 200">
+          <defs>
+            <radialGradient id="hotCore" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#ffffff"/>
+              <stop offset="40%" stop-color="#d8fbff"/>
+              <stop offset="75%" stop-color="#5fe0ff" stop-opacity=".85"/>
+              <stop offset="100%" stop-color="#0a3644" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="steelBevel" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#eafcff"/>
+              <stop offset="30%" stop-color="#5fc7e8"/>
+              <stop offset="60%" stop-color="#1c5f75"/>
+              <stop offset="100%" stop-color="#04141c"/>
+            </linearGradient>
+            <linearGradient id="steelBevelRev" x1="1" y1="1" x2="0" y2="0">
+              <stop offset="0%" stop-color="#eafcff"/>
+              <stop offset="30%" stop-color="#5fc7e8"/>
+              <stop offset="60%" stop-color="#1c5f75"/>
+              <stop offset="100%" stop-color="#04141c"/>
+            </linearGradient>
+            <radialGradient id="navyWell" cx="50%" cy="50%" r="60%">
+              <stop offset="0%" stop-color="#0a1c2e"/>
+              <stop offset="70%" stop-color="#050e18"/>
+              <stop offset="100%" stop-color="#01060a"/>
+            </radialGradient>
+            <filter id="softBlur" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="2.2"/>
+            </filter>
+          </defs>
+
+          <!-- base navy disc -->
+          <circle cx="100" cy="100" r="97" fill="url(#navyWell)"/>
+
+          <!-- faint crosshair reticle -->
+          <g stroke="#3fa6c9" stroke-width=".6" opacity=".4">
+            <line x1="100" y1="4" x2="100" y2="196"/>
+            <line x1="4" y1="100" x2="196" y2="100"/>
+            <line x1="26" y1="26" x2="174" y2="174"/>
+            <line x1="174" y1="26" x2="26" y2="174"/>
+          </g>
+
+          <!-- red tick scale ring -->
+          <g id="tickGroup"></g>
+
+          <!-- outer steel rim -->
+          <circle cx="100" cy="100" r="90" fill="none" stroke="url(#steelBevel)" stroke-width="6"/>
+          <circle cx="100" cy="100" r="90" fill="none" stroke="#eafcff" stroke-width=".8" opacity=".7"/>
+
+          <!-- segmented plate ring -->
+          <circle cx="100" cy="100" r="79" fill="none" stroke="url(#steelBevelRev)" stroke-width="13"
+                  stroke-dasharray="24 8" opacity=".9"/>
+          <circle cx="100" cy="100" r="79" fill="none" stroke="#020a0e" stroke-width="13"
+                  stroke-dasharray="3 29" opacity=".7"/>
+
+          <!-- inner segmented ring, offset dashes -->
+          <circle cx="100" cy="100" r="61" fill="none" stroke="url(#steelBevel)" stroke-width="9"
+                  stroke-dasharray="16 6" stroke-dashoffset="5" opacity=".85"/>
+
+          <!-- four tapered spokes N/E/S/W -->
+          <g fill="url(#steelBevel)" stroke="#020a0e" stroke-width="1">
+            <polygon points="100,10 114,10 110,50 100,57 90,50 86,10" />
+            <polygon points="100,10 114,10 110,50 100,57 90,50 86,10" transform="rotate(90 100 100)"/>
+            <polygon points="100,10 114,10 110,50 100,57 90,50 86,10" transform="rotate(180 100 100)"/>
+            <polygon points="100,10 114,10 110,50 100,57 90,50 86,10" transform="rotate(270 100 100)"/>
+          </g>
+          <g stroke="#eafcff" stroke-width="1.2" opacity=".8">
+            <line x1="100" y1="14" x2="100" y2="52"/>
+            <line x1="100" y1="14" x2="100" y2="52" transform="rotate(90 100 100)"/>
+            <line x1="100" y1="14" x2="100" y2="52" transform="rotate(180 100 100)"/>
+            <line x1="100" y1="14" x2="100" y2="52" transform="rotate(270 100 100)"/>
+          </g>
+
+          <!-- mid collar -->
+          <circle cx="100" cy="100" r="45" fill="none" stroke="url(#steelBevelRev)" stroke-width="6"/>
+          <circle cx="100" cy="100" r="45" fill="none" stroke="#eafcff" stroke-width=".6" opacity=".6"/>
+
+          <!-- dark well -->
+          <circle cx="100" cy="100" r="38" fill="#02080c"/>
+          <circle cx="100" cy="100" r="38" fill="none" stroke="#0a2530" stroke-width="1.2"/>
+
+          <!-- ambient blue glow -->
+          <circle cx="100" cy="100" r="30" fill="url(#hotCore)" opacity=".6" filter="url(#softBlur)"/>
+
+          <!-- segmented triangular reactor core -->
+          <polygon points="100,72 128,120 72,120" fill="#02080c" stroke="#04141c" stroke-width="5" stroke-linejoin="round"/>
+          <polygon class="tri-fill" points="100,78 121,116 79,116" fill="url(#hotCore)" opacity=".75"/>
+          <polygon class="tri" points="100,78 121,116 79,116" fill="none" stroke="#bdf6ff" stroke-width="2.4"
+                   filter="drop-shadow(0 0 6px rgba(150,235,255,.95))"/>
+          <!-- internal panel divider lines -->
+          <g stroke="#02080c" stroke-width="1.6" opacity=".8">
+            <line x1="100" y1="78" x2="100" y2="116"/>
+            <line x1="100" y1="97" x2="79" y2="116"/>
+            <line x1="100" y1="97" x2="121" y2="116"/>
+          </g>
+        </svg>
+      </div>
+
+    </div>
+
+    <!-- Interactive AI Command Console Panel -->
+    <div class="chat-container" id="chatContainer" onclick="focusConsole()">
+      <div class="chat-header">
+        <span class="chat-title">COMMUNICATION LINK // AI OS CONSOLE</span>
+        <span class="chat-status" id="chatStatus">SECURE</span>
+      </div>
+      <div class="chat-messages" id="chatMessages" tabindex="0">
+        <!-- Conversation and real-time execution steps populated dynamically -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== RIGHT COLUMN ===== -->
+  <div class="col col-right">
+    <div class="panel">
+      <div class="panel-label">System Time</div>
+      <div class="clock-box" style="text-align:left;">
+        <div class="clock-time" id="clockTime">00:00:00</div>
+        <div class="clock-date" id="clockDate">—</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label" id="weatherLoc">Local Weather</div>
+      <div class="weather-temp"><span id="wTemp">--</span>°C</div>
+      <div class="weather-cond" id="wCond">—</div>
+      <div class="weather-grid">
+        <div>HUMIDITY <b id="wHum">--%</b></div>
+        <div>WIND <b id="wWind">-- km/h</b></div>
+        <div>PRESSURE <b id="wPress">---- mb</b></div>
+        <div>VISIBILITY <b id="wVis">-- km</b></div>
+      </div>
+      <div class="forecast-day"><span class="d">TOMORROW</span> — <span id="fc1">--° / --°</span></div>
+      <div class="forecast-day"><span class="d">DAY AFTER</span> — <span id="fc2">--° / --°</span></div>
+    </div>
+
+    <div class="panel grow">
+      <div class="panel-label">CPU 2</div>
+      <canvas class="graph" id="cpu2Graph"></canvas>
+    </div>
+
+    <div class="panel">
+      <div class="dial-pair">
+        <div class="dial"></div>
+        <div style="font-size:10px;">
+          <div class="panel-label" style="margin:0;">GPU Load</div>
+          <div id="gpuVal" class="value-lg" style="font-size:15px;">00%</div>
+        </div>
+        <div class="dial"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <div class="footer">
+    <div class="panel" style="display:flex; align-items:center; justify-content:space-between; overflow:hidden;">
+      <span style="font-family:'Orbitron',sans-serif; font-size:10px; white-space:nowrap; margin-right:8px;">LATEST UPDATE</span>
+      <marquee scrollamount="2.5" style="font-size:10px; color:var(--cyan-bright); text-shadow:var(--glow); flex:1;" id="newsMarquee">Awaiting news feed...</marquee>
+    </div>
+    <div class="brand">J·A·R·V·I·S</div>
+    <div class="panel" style="display:flex; align-items:center; justify-content:space-between;">
+      <span style="font-family:'Orbitron',sans-serif; font-size:10px;">UPTIME</span>
+      <b class="value-lg" id="uptime" style="font-size:12px;">0d 00h 00m</b>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ---------------- waveform header bars ---------------- */
+const barsEl = document.getElementById('bars');
+for(let i=0;i<18;i++){
+  const b = document.createElement('i');
+  b.style.height = '100%';
+  b.style.animationDelay = (Math.random()*1.4).toFixed(2)+'s';
+  b.style.animationDuration = (0.9+Math.random()*1.2).toFixed(2)+'s';
+  barsEl.appendChild(b);
+}
+
+/* ---------------- generic scrolling line-graph ---------------- */
+function makeGraph(canvas, {points=60, min=0, max=100, seed=50, volatility=6}={}){
+  const ctx = canvas.getContext('2d');
+  let data = new Array(points).fill(seed);
+  function resize(){
+    const r = canvas.getBoundingClientRect();
+    canvas.width = r.width * devicePixelRatio;
+    canvas.height = r.height * devicePixelRatio;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function step(){
+    let last = data[data.length-1];
+    let next = last + (Math.random()-0.5)*volatility;
+    next = Math.max(min, Math.min(max, next));
+    data.push(next); data.shift();
+    return next;
+  }
+
+  function draw(){
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+
+    // grid
+    ctx.strokeStyle = 'rgba(79,216,255,0.08)';
+    ctx.lineWidth = 1;
+    for(let i=0;i<=4;i++){
+      const y = (h/4)*i;
+      ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke();
+    }
+
+    // fill
+    ctx.beginPath();
+    data.forEach((v,i)=>{
+      const x = (i/(points-1))*w;
+      const y = h - ((v-min)/(max-min))*h;
+      i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    });
+    ctx.lineTo(w,h); ctx.lineTo(0,h); ctx.closePath();
+    const grad = ctx.createLinearGradient(0,0,0,h);
+    grad.addColorStop(0,'rgba(79,216,255,0.35)');
+    grad.addColorStop(1,'rgba(79,216,255,0.02)');
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // line
+    ctx.beginPath();
+    data.forEach((v,i)=>{
+      const x = (i/(points-1))*w;
+      const y = h - ((v-min)/(max-min))*h;
+      i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    });
+    ctx.strokeStyle = '#4fd8ff';
+    ctx.lineWidth = 1.6 * devicePixelRatio;
+    ctx.shadowColor = 'rgba(79,216,255,0.9)';
+    ctx.shadowBlur = 6;
+    ctx.stroke();
+  }
+
+  function pushValue(v){
+    data.push(v); data.shift();
+  }
+
+  function setVolatility(v){
+    volatility = v;
+  }
+
+  return { step, draw, pushValue, setVolatility, getLast: ()=>data[data.length-1] };
+}
+
+const cpuGraph = makeGraph(document.getElementById('cpuGraph'), {seed:8, volatility:5, min:0, max:60});
+const cpu2Graph = makeGraph(document.getElementById('cpu2Graph'), {seed:20, volatility:8, min:0, max:80});
+const waveGraph = makeGraph(document.getElementById('waveGraph'), {seed:0, volatility:40, min:-50, max:50});
+
+let lastHistoryJSON = "";
+const animatedMessageTimestamps = new Set();
+let commandHistory = [];
+let historyIndex = -1;
+
+const PRESET_COMMANDS = [
+  "Start Work Mode",
+  "What is on my screen",
+  "Research latest AI news",
+  "Open Chrome",
+  "Open my Resume",
+  "Summarize this document",
+  "Create a quiz from this",
+  "Give me the important formulas",
+  "Scroll down",
+  "Close document"
+];
+
+function focusConsole() {
+  const inputEl = document.getElementById('terminalInput');
+  if (inputEl) {
+    inputEl.focus();
+    placeCaretAtEnd(inputEl);
+  }
+}
+
+function placeCaretAtEnd(el) {
+  try {
+    el.focus();
+    if (typeof window.getSelection !== "undefined" && typeof document.createRange !== "undefined") {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      range.collapse(false);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  } catch(e) {}
+}
+
+function getTerminalInputText() {
+  const inputEl = document.getElementById('terminalInput');
+  return inputEl ? inputEl.innerText : "";
+}
+
+function handleInputKeydown(e) {
+  const inputEl = document.getElementById('terminalInput');
+  if (!inputEl) return;
+
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    const cmd = inputEl.innerText.trim();
+    if (cmd) {
+      inputEl.innerText = '';
+      commandHistory.push(cmd);
+      historyIndex = commandHistory.length;
+      submitConsoleCommand(cmd);
+    }
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (commandHistory.length > 0 && historyIndex > 0) {
+      historyIndex--;
+      inputEl.innerText = commandHistory[historyIndex];
+      placeCaretAtEnd(inputEl);
+    }
+  } else if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (historyIndex < commandHistory.length - 1) {
+      historyIndex++;
+      inputEl.innerText = commandHistory[historyIndex];
+      placeCaretAtEnd(inputEl);
+    } else {
+      historyIndex = commandHistory.length;
+      inputEl.innerText = '';
+    }
+  } else if (e.key === 'Tab') {
+    e.preventDefault();
+    const current = inputEl.innerText.trim().toLowerCase();
+    if (current) {
+      const match = PRESET_COMMANDS.find(c => c.toLowerCase().startsWith(current)) ||
+                    commandHistory.find(c => c.toLowerCase().startsWith(current));
+      if (match) {
+        inputEl.innerText = match;
+        placeCaretAtEnd(inputEl);
+      }
+    }
+  }
+}
+
+async function submitConsoleCommand(cmd) {
+  try {
+    const statusEl = document.getElementById('chatStatus');
+    if (statusEl) {
+      statusEl.textContent = "PROCESSING";
+      statusEl.style.color = "#f97316";
+    }
+
+    const res = await fetch('/api/command', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ command: cmd })
+    });
+    const data = await res.json();
+    console.log("[Console] Command submitted successfully:", data);
+  } catch (err) {
+    console.error("[Console] Command submission error:", err);
+  }
+}
+
+function updateChatHistory(chatHistory) {
+  const container = document.getElementById('chatMessages');
+  if (!container) return;
+
+  const currentTypedText = getTerminalInputText();
+  const historyJSON = JSON.stringify(chatHistory || []);
+  
+  if (historyJSON === lastHistoryJSON) {
+    return; // History unchanged
+  }
+  lastHistoryJSON = historyJSON;
+
+  container.innerHTML = "";
+
+  if (chatHistory && chatHistory.length > 0) {
+    chatHistory.forEach((msg, idx) => {
+      const role = msg.role || "system";
+
+      // Add horizontal divider before user entries
+      if (role === 'user' || role === 'user_voice') {
+        const divEl = document.createElement('div');
+        divEl.className = 'console-divider';
+        divEl.textContent = '-----------------------------------';
+        container.appendChild(divEl);
+      }
+
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `console-entry ${role}`;
+
+      const roleDiv = document.createElement('div');
+      roleDiv.className = 'console-role';
+      if (role === 'user') roleDiv.textContent = 'USER >';
+      else if (role === 'user_voice') roleDiv.textContent = 'USER (Voice) >';
+      else if (role === 'jarvis') roleDiv.textContent = 'JARVIS >';
+      else if (role === 'tool') roleDiv.textContent = '⚡ STEP PROGRESS';
+      else if (role === 'system') roleDiv.textContent = 'SYSTEM >';
+      else roleDiv.textContent = `${role.toUpperCase()} >`;
+
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'console-body';
+
+      msgDiv.appendChild(roleDiv);
+      msgDiv.appendChild(contentDiv);
+
+      const msgKey = msg.timestamp || (role + "_" + msg.content);
+      if (role === 'jarvis' && idx === chatHistory.length - 1 && !animatedMessageTimestamps.has(msgKey)) {
+        animatedMessageTimestamps.add(msgKey);
+        contentDiv.textContent = "";
+        const words = msg.content.split(" ");
+        let currentWordIndex = 0;
+        
+        function typeNextWord() {
+          if (currentWordIndex < words.length) {
+            contentDiv.textContent += (currentWordIndex > 0 ? " " : "") + words[currentWordIndex];
+            currentWordIndex++;
+            container.scrollTop = container.scrollHeight;
+            setTimeout(typeNextWord, 50); // Premium typing flow: 50ms per word
+          } else {
+            // Check if success marker should be appended after typing complete
+            if (msg.content.includes('Ready') || msg.content.includes('opened') || msg.content.includes('Completed') || msg.content.includes('loaded') || msg.content.includes('complete')) {
+              const successDiv = document.createElement('div');
+              successDiv.className = 'console-success';
+              successDiv.textContent = '✓ Task Completed.';
+              msgDiv.appendChild(successDiv);
+            }
+          }
+        }
+        typeNextWord();
+      } else {
+        contentDiv.textContent = msg.content;
+        // Check if success marker should be appended
+        if (role === 'jarvis' && (msg.content.includes('Ready') || msg.content.includes('opened') || msg.content.includes('Completed') || msg.content.includes('loaded') || msg.content.includes('complete'))) {
+          const successDiv = document.createElement('div');
+          successDiv.className = 'console-success';
+          successDiv.textContent = '✓ Task Completed.';
+          msgDiv.appendChild(successDiv);
+        }
+        animatedMessageTimestamps.add(msgKey);
+      }
+
+      container.appendChild(msgDiv);
+    });
+  } else {
+    // Initial welcome
+    const welcomeDiv = document.createElement('div');
+    welcomeDiv.className = 'console-entry system';
+    welcomeDiv.innerHTML = '<div class="console-role">SYSTEM ></div><div class="console-body">Core HUD Console Initialized. Click anywhere to type commands or speak.</div>';
+    container.appendChild(welcomeDiv);
+  }
+
+  // Append Interactive Prompt Line
+  const promptLine = document.createElement('div');
+  promptLine.className = 'active-prompt-line';
+  promptLine.id = 'activePromptLine';
+
+  const label = document.createElement('span');
+  label.className = 'active-prompt-label';
+  label.textContent = 'JARVIS >';
+
+  const inputEl = document.createElement('span');
+  inputEl.className = 'terminal-input';
+  inputEl.id = 'terminalInput';
+  inputEl.contentEditable = "true";
+  inputEl.spellcheck = false;
+  inputEl.innerText = currentTypedText;
+  inputEl.onkeydown = handleInputKeydown;
+
+  const cursor = document.createElement('span');
+  cursor.className = 'terminal-cursor';
+  cursor.id = 'terminalCursor';
+  cursor.textContent = '█';
+
+  promptLine.appendChild(label);
+  promptLine.appendChild(inputEl);
+  promptLine.appendChild(cursor);
+  container.appendChild(promptLine);
+
+  container.scrollTop = container.scrollHeight;
+}
+
+
+async function tickGraphs(){
+  try {
+    const res = await fetch('/api/stats');
+    const stats = await res.json();
+    
+    // Push real stats to graphs
+    cpuGraph.pushValue(stats.cpu_percent); cpuGraph.draw();
+    cpu2Graph.pushValue(stats.cpu_percent); cpu2Graph.draw();
+    
+    // WaveGraph dynamic volatility based on state
+    let waveVol = 2; // idle
+    if (stats.state === 'listening') {
+      waveVol = 35;
+    } else if (stats.state === 'speaking') {
+      waveVol = 20;
+    } else if (stats.state === 'processing') {
+      waveVol = 8;
+    }
+    waveGraph.setVolatility(waveVol);
+    waveGraph.step(); waveGraph.draw();
+    
+    // Update texts
+    document.getElementById('cpuVal').textContent = stats.cpu_percent.toFixed(1)+' %';
+    document.getElementById('cpuTemp').textContent = stats.cpu_temp.toFixed(1)+'°C';
+    document.getElementById('gpuVal').textContent = stats.gpu_percent + '%';
+    
+    // Update reminders
+    const remindersContainer = document.getElementById('remindersContainer');
+    if (remindersContainer && stats.reminders) {
+      if (stats.reminders.length === 0) {
+        remindersContainer.innerHTML = '<div style="color:var(--cyan-dim); font-style:italic;">No active reminders.</div>';
+      } else {
+        remindersContainer.innerHTML = stats.reminders.map(r => `
+          <div style="border-left:2px solid var(--cyan); padding-left:5px; margin-bottom:4px; font-size:9.5px; line-height:1.2;">
+            <div style="font-weight:600; color:var(--cyan-bright); text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${r.text}</div>
+            <div style="font-size:8px; color:var(--cyan-dim);">${r.time}</div>
+          </div>
+        `).join('');
+      }
+    }
+
+    // Update news
+    const newsContainer = document.getElementById('newsContainer');
+    if (newsContainer && stats.news) {
+      if (stats.news.length === 0) {
+        newsContainer.innerHTML = '<div style="color:var(--cyan-dim); font-style:italic;">Loading news feed...</div>';
+      } else {
+        newsContainer.innerHTML = stats.news.map((item, idx) => `
+          <div style="border-bottom:1px solid rgba(79,216,255,0.15); padding-bottom:3.5px; display:flex; gap:6px; font-size:10px; margin-top:2px;">
+            <span style="color:var(--cyan-bright); font-weight:700;">[${String(idx+1).padStart(2,'0')}]</span>
+            <span style="color:var(--cyan);">${item}</span>
+          </div>
+        `).join('');
+        
+        // Also update footer marquee
+        const marquee = document.getElementById('newsMarquee');
+        if (marquee) {
+          marquee.textContent = stats.news.join("   •   ");
+        }
+      }
+    }
+    
+    // Update uptime
+    const s = stats.uptime_seconds;
+    const d = Math.floor(s/86400), h = Math.floor((s%86400)/3600), m = Math.floor((s%3600)/60);
+    document.getElementById('uptime').textContent = `${d}d ${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m`;
+    
+    // Update status panel
+    let statusText = "ALL SYSTEMS NOMINAL";
+    let statusColor = "var(--cyan-bright)";
+    let chatStatus = "SECURE";
+    let chatStatusColor = "#22c55e";
+    
+    if (stats.state === 'listening') {
+      statusText = "LISTENING FOR COMMAND";
+      statusColor = "#00d4ff";
+      chatStatus = "LISTENING";
+      chatStatusColor = "#00d4ff";
+    } else if (stats.state === 'processing') {
+      statusText = "PROCESSING AI COGNITION";
+      statusColor = "#f97316";
+      chatStatus = "PROCESSING";
+      chatStatusColor = "#f97316";
+    } else if (stats.state === 'speaking') {
+      statusText = "SPEECH ENGINES ACTIVE";
+      statusColor = "#a855f7";
+      chatStatus = "TRANSMITTING";
+      chatStatusColor = "#a855f7";
+    }
+    
+    const statusEl = document.querySelector('.footer .panel:nth-child(1) b');
+    if (statusEl) {
+      statusEl.textContent = statusText;
+      statusEl.style.color = statusColor;
+    }
+    
+    const chatStatusEl = document.getElementById('chatStatus');
+    if (chatStatusEl) {
+      chatStatusEl.textContent = chatStatus;
+      chatStatusEl.style.color = chatStatusColor;
+      chatStatusEl.style.textShadow = `0 0 4px ${chatStatusColor}`;
+    }
+    
+    // Update reactor state text and ring rotation speed based on state
+    const reactorStateEl = document.getElementById('reactorState');
+    if (reactorStateEl) {
+      reactorStateEl.textContent = stats.state.toUpperCase();
+      reactorStateEl.style.color = statusColor;
+      reactorStateEl.style.textShadow = `0 0 6px ${statusColor}`;
+    }
+    
+    const ringOuter = document.querySelector('.ring-outer');
+    if (ringOuter) {
+      if (stats.state === 'processing') {
+        ringOuter.style.animationDuration = '12s';
+      } else if (stats.state === 'listening') {
+        ringOuter.style.animationDuration = '20s';
+      } else {
+        ringOuter.style.animationDuration = '60s';
+      }
+    }
+    
+    const ringMid = document.querySelector('.ring-mid');
+    if (ringMid) {
+      if (stats.state === 'processing') {
+        ringMid.style.animationDuration = '8s';
+      } else if (stats.state === 'listening') {
+        ringMid.style.animationDuration = '12s';
+      } else {
+        ringMid.style.animationDuration = '40s';
+      }
+    }
+    
+    // Update chat history
+    updateChatHistory(stats.chat_history);
+    
+  } catch (e) {
+    console.error("HUD Stat fetch failed:", e);
+    // Fallback step of graphs
+    cpuGraph.step(); cpuGraph.draw();
+    cpu2Graph.step(); cpu2Graph.draw();
+    ramGraph.step(); ramGraph.draw();
+    netGraph.step(); netGraph.draw();
+    waveGraph.step(); waveGraph.draw();
+  }
+}
+setInterval(tickGraphs, 900);
+tickGraphs();
+
+/* ---------------- clock ---------------- */
+function updateClock(){
+  const d = new Date();
+  document.getElementById('clockTime').textContent = d.toLocaleTimeString([], {hour12:false});
+  document.getElementById('clockDate').textContent = d.toLocaleDateString([], {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+/* ---------------- uptime ---------------- */
+const bootTime = Date.now();
+function updateUptime(){
+  const s = Math.floor((Date.now()-bootTime)/1000);
+  const d = Math.floor(s/86400), h = Math.floor((s%86400)/3600), m = Math.floor((s%3600)/60);
+  document.getElementById('uptime').textContent = `${d}d ${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m`;
+}
+setInterval(updateUptime, 1000); updateUptime();
+
+/* ---------------- red tick scale ring around reactor ---------------- */
+const tickGroup = document.getElementById('tickGroup');
+if(tickGroup){
+  const cx=100, cy=100, rIn=95, rOut=99, majorEvery=5, count=60;
+  for(let i=0;i<count;i++){
+    const angle = (360/count)*i;
+    const rad = angle*Math.PI/180;
+    const isMajor = i % majorEvery === 0;
+    const rStart = isMajor ? rIn-3 : rIn;
+    const x1 = cx + rStart*Math.cos(rad), y1 = cy + rStart*Math.sin(rad);
+    const x2 = cx + rOut*Math.cos(rad),  y2 = cy + rOut*Math.sin(rad);
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1', x1.toFixed(2)); line.setAttribute('y1', y1.toFixed(2));
+    line.setAttribute('x2', x2.toFixed(2)); line.setAttribute('y2', y2.toFixed(2));
+    line.setAttribute('stroke', '#ff3b3b');
+    line.setAttribute('stroke-width', isMajor ? '1.4' : '0.7');
+    line.setAttribute('opacity', isMajor ? '.85' : '.45');
+    tickGroup.appendChild(line);
+  }
+}
+
+/* radial text labels removed around the reactor ring */
+
+/* ---------------- weather (Open-Meteo, no key needed) ---------------- */
+async function loadWeather(){
+  try{
+    const pos = await new Promise((res,rej)=>{
+      if(!navigator.geolocation) return rej();
+      navigator.geolocation.getCurrentPosition(res, rej, {timeout:4000});
+    });
+    const {latitude, longitude} = pos.coords;
+    await fetchWeather(latitude, longitude);
+  }catch(e){
+    // fallback: a default location
+    await fetchWeather(17.385, 78.4867, "Hyderabad, IN");
+  }
+}
+
+async function fetchWeather(lat, lon, label){
+  try{
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,surface_pressure,visibility&daily=temperature_2m_max,temperature_2m_min&timezone=auto`;
+    const r = await fetch(url);
+    const j = await r.json();
+    const c = j.current;
+    document.getElementById('wTemp').textContent = Math.round(c.temperature_2m);
+    document.getElementById('wCond').textContent = weatherCodeToText(c.weather_code);
+    document.getElementById('wHum').textContent = c.relative_humidity_2m+'%';
+    document.getElementById('wWind').textContent = Math.round(c.wind_speed_10m)+' km/h';
+    document.getElementById('wPress').textContent = Math.round(c.surface_pressure)+' mb';
+    document.getElementById('wVis').textContent = (c.visibility? (c.visibility/1000).toFixed(1):'--')+' km';
+    if(j.daily){
+      document.getElementById('fc1').textContent = `${Math.round(j.daily.temperature_2m_max[1])}° / ${Math.round(j.daily.temperature_2m_min[1])}°`;
+      document.getElementById('fc2').textContent = `${Math.round(j.daily.temperature_2m_max[2])}° / ${Math.round(j.daily.temperature_2m_min[2])}°`;
+    }
+    if(label) document.getElementById('weatherLoc').textContent = label;
+    else document.getElementById('weatherLoc').textContent = 'Local Weather';
+  }catch(e){
+    document.getElementById('wCond').textContent = 'Unavailable';
+  }
+}
+function weatherCodeToText(code){
+  const map = {0:'Clear',1:'Mostly Clear',2:'Partly Cloudy',3:'Overcast',45:'Fog',48:'Fog',51:'Light Drizzle',61:'Rain',63:'Rain',65:'Heavy Rain',71:'Snow',73:'Snow',75:'Heavy Snow',80:'Showers',95:'Thunderstorms'};
+  return map[code] || 'Fair';
+}
+loadWeather();
+setInterval(loadWeather, 10*60*1000);
+
+// ESC key kill switch
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    console.log("ESC key pressed. Requesting shutdown...");
+    fetch('/api/shutdown')
+      .then(res => res.json())
+      .then(data => {
+        window.close();
+      })
+      .catch(err => {
+        console.error("Shutdown call failed:", err);
+      });
+  }
+});
+</script>
+</body>
+</html>

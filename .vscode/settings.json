@@ -1,0 +1,8 @@
+{
+    "python.analysis.extraPaths": [
+        "./Jarvis-main"
+    ],
+    "python.autoComplete.extraPaths": [
+        "./Jarvis-main"
+    ]
+}

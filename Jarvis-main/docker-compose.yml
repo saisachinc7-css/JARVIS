@@ -1,0 +1,11 @@
+version: "3.9"
+
+services:
+  antigravity:
+    build: .
+    container_name: antigravity-assistant
+    env_file:
+      - .env
+    volumes:
+      - ./:/app
+    command: python Jarvis.py
